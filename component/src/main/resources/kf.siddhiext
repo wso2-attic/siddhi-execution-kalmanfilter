@@ -16,4 +16,4 @@
 # under the License.
 #
 
-kalmanFilter=org.wso2.siddhi.extension.kf.KalmanFilter
+kalmanFilter=org.wso2.extension.siddhi.execution.kalmanfilter.KalmanFilter

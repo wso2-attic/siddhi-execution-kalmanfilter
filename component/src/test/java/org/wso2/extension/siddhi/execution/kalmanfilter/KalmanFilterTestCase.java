@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c)  2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.kf;
+package org.wso2.extension.siddhi.execution.kalmanfilter;
 
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
@@ -48,12 +48,12 @@ public class KalmanFilterTestCase {
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 "" +
-                "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
-                                            "timestamp long); " +
-                "@info(name = 'query1') " +
-                    "from cleanedStream " +
-                    "select kf:kalmanFilter(latitude) as kalmanEstimatedValue " +
-                    "insert into dataOut;");
+                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
+                        "timestamp long); " +
+                        "@info(name = 'query1') " +
+                        "from cleanedStream " +
+                        "select kf:kalmanFilter(latitude) as kalmanEstimatedValue " +
+                        "insert into dataOut;");
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -64,10 +64,10 @@ public class KalmanFilterTestCase {
                     if (count == 1) {
                         Assert.assertEquals(-74.178444d, event.getData(0));
                         eventArrived = true;
-                    }else if (count == 2) {
+                    } else if (count == 2) {
                         Assert.assertEquals(-74.178158000143d, event.getData(0));
                         eventArrived = true;
-                    }else if (count == 3) {
+                    } else if (count == 3) {
                         Assert.assertEquals(-74.1773396670348d, event.getData(0));
                         eventArrived = true;
                     }
@@ -97,12 +97,12 @@ public class KalmanFilterTestCase {
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 "" +
-                "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
-                                            "timestamp long); " +
-                "@info(name = 'query1') " +
-                    "from cleanedStream " +
-                    "select kf:kalmanFilter(latitude, measurementNoiseSD) as kalmanEstimatedValue " +
-                    "insert into dataOut;");
+                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
+                        "timestamp long); " +
+                        "@info(name = 'query1') " +
+                        "from cleanedStream " +
+                        "select kf:kalmanFilter(latitude, measurementNoiseSD) as kalmanEstimatedValue " +
+                        "insert into dataOut;");
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -113,10 +113,10 @@ public class KalmanFilterTestCase {
                     if (count == 1) {
                         Assert.assertEquals(-74.178444d, event.getData(0));
                         eventArrived = true;
-                    }else if (count == 2) {
+                    } else if (count == 2) {
                         Assert.assertEquals(-74.17815800142999d, event.getData(0));
                         eventArrived = true;
-                    }else if (count == 3) {
+                    } else if (count == 3) {
                         Assert.assertEquals(-74.17733967034776d, event.getData(0));
                         eventArrived = true;
                     }
@@ -146,12 +146,12 @@ public class KalmanFilterTestCase {
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 "" +
-                "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
-                                            "timestamp long); " +
-                "@info(name = 'query1') " +
-                    "from cleanedStream " +
-                    "select kf:kalmanFilter(latitude, changingRate, measurementNoiseSD, timestamp) as kalmanEstimatedValue " +
-                    "insert into dataOut;");
+                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
+                        "timestamp long); " +
+                        "@info(name = 'query1') " +
+                        "from cleanedStream " +
+                        "select kf:kalmanFilter(latitude, changingRate, measurementNoiseSD, timestamp) as kalmanEstimatedValue " +
+                        "insert into dataOut;");
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -195,12 +195,12 @@ public class KalmanFilterTestCase {
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 "" +
-                "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
-                                            "timestamp long); " +
-                "@info(name = 'query1') " +
-                    "from cleanedStream " +
-                    "select kf:kalmanFilter(latitude, changingRate, measurementNoiseSD, timestamp) as kalmanEstimatedValue " +
-                    "insert into dataOut;");
+                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
+                        "timestamp long); " +
+                        "@info(name = 'query1') " +
+                        "from cleanedStream " +
+                        "select kf:kalmanFilter(latitude, changingRate, measurementNoiseSD, timestamp) as kalmanEstimatedValue " +
+                        "insert into dataOut;");
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override

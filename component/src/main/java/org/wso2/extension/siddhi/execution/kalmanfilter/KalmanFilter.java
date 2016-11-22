@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c)  2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.kf;
+package org.wso2.extension.siddhi.execution.kalmanfilter;
 
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -33,46 +33,44 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
  * kalmanFilter(measuredValue)
  * kalmanFilter(measuredValue, measurementNoiseSD)
  * kalmanFilter(measuredValue, measuredChangingRate, measurementNoiseSD, timestamp)
- *
+ * <p>
  * These methods estimate values for noisy data.
- *
+ * <p>
  * measuredValue - measured value eg:40.695881
  * measuredChangingRate - Changing rate. eg: Velocity of the point which describes from measured value - 0.003d meters per second
  * measurementNoiseSD - standard deviation of the noise. eg: 0.01
  * timestamp - the timestamp at the measured time eg: 1445234861l
- *
+ * <p>
  * Accept Type(s) for kalmanFilter(measuredValue);
- *  measuredValue : DOUBLE
- *
+ * measuredValue : DOUBLE
+ * <p>
  * Accept Type(s) for kalmanFilter(measuredValue, measurementNoiseSD);
- *  measuredValue : DOUBLE
- *  measurementNoiseSD : DOUBLE
- *
+ * measuredValue : DOUBLE
+ * measurementNoiseSD : DOUBLE
+ * <p>
  * Accept Type(s) for kalmanFilter(measuredValue, measuredChangingRate, measurementNoiseSD, timestamp);
- *  measuredValue : DOUBLE
- *  measuredChangingRate : DOUBLE
- *  measurementNoiseSD : DOUBLE
- *  timestamp : LONG
- *
+ * measuredValue : DOUBLE
+ * measuredChangingRate : DOUBLE
+ * measurementNoiseSD : DOUBLE
+ * timestamp : LONG
+ * <p>
  * Return Type(s): DOUBLE
  */
 
 
 public class KalmanFilter extends FunctionExecutor {
 
+    Attribute.Type returnType = Attribute.Type.DOUBLE;
     //for static kalman filter
     private double transition; //A
     private double measurementNoiseSD; //standard deviation of the measurement noise
     private double prevEstimatedValue; //to remain as the initial state
     private double variance; //P
-
     //for dynamic kalman filter
     private RealMatrix measurementMatrixH = null;
     private RealMatrix varianceMatrixP;
     private RealMatrix prevMeasuredMatrix;
     private long prevTimestamp;
-
-    Attribute.Type returnType = Attribute.Type.DOUBLE;
 
     @Override
     public void start() {
@@ -87,7 +85,7 @@ public class KalmanFilter extends FunctionExecutor {
     @Override
     public Object[] currentState() {
         return new Object[]{transition, measurementNoiseSD, prevEstimatedValue, variance, measurementMatrixH,
-                            varianceMatrixP, prevMeasuredMatrix, prevTimestamp};
+                varianceMatrixP, prevMeasuredMatrix, prevTimestamp};
     }
 
     @Override
@@ -105,36 +103,36 @@ public class KalmanFilter extends FunctionExecutor {
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length != 1 && attributeExpressionExecutors.length != 2 &&
-            attributeExpressionExecutors.length != 4) {
+                attributeExpressionExecutors.length != 4) {
             throw new ExecutionPlanValidationException("Invalid no of arguments passed to kf:kalmanFilter() function," +
-                                                       " required 1, 2 or 4, but found " + attributeExpressionExecutors.length);
+                    " required 1, 2 or 4, but found " + attributeExpressionExecutors.length);
         } else {
             if (attributeExpressionExecutors[0].getReturnType() != Attribute.Type.DOUBLE) {
                 throw new ExecutionPlanValidationException("Invalid parameter type found for the first argument " +
-                                                           "of kf:kalmanFilter() function, required " +
-                                                           Attribute.Type.DOUBLE + ", but found " +
-                                                           attributeExpressionExecutors[0].getReturnType().toString());
+                        "of kf:kalmanFilter() function, required " +
+                        Attribute.Type.DOUBLE + ", but found " +
+                        attributeExpressionExecutors[0].getReturnType().toString());
             }
             if (attributeExpressionExecutors.length == 2 || attributeExpressionExecutors.length == 4) {
                 if (attributeExpressionExecutors[1].getReturnType() != Attribute.Type.DOUBLE) {
                     throw new ExecutionPlanValidationException("Invalid parameter type found for the second argument " +
-                                                               "of kf:kalmanFilter() function, required " +
-                                                               Attribute.Type.DOUBLE + ", but found " +
-                                                               attributeExpressionExecutors[1].getReturnType().toString());
+                            "of kf:kalmanFilter() function, required " +
+                            Attribute.Type.DOUBLE + ", but found " +
+                            attributeExpressionExecutors[1].getReturnType().toString());
                 }
             }
             if (attributeExpressionExecutors.length == 4) {
                 if (attributeExpressionExecutors[2].getReturnType() != Attribute.Type.DOUBLE) {
                     throw new ExecutionPlanValidationException("Invalid parameter type found for the third argument " +
-                                                               "of kf:kalmanFilter() function, required " +
-                                                               Attribute.Type.DOUBLE + ", but found " +
-                                                               attributeExpressionExecutors[1].getReturnType().toString());
+                            "of kf:kalmanFilter() function, required " +
+                            Attribute.Type.DOUBLE + ", but found " +
+                            attributeExpressionExecutors[1].getReturnType().toString());
                 }
                 if (attributeExpressionExecutors[3].getReturnType() != Attribute.Type.LONG) {
                     throw new ExecutionPlanValidationException("Invalid parameter type found for the fourth argument " +
-                                                               "of kf:kalmanFilter() function, required " +
-                                                               Attribute.Type.LONG + ", but found " +
-                                                               attributeExpressionExecutors[1].getReturnType().toString());
+                            "of kf:kalmanFilter() function, required " +
+                            Attribute.Type.LONG + ", but found " +
+                            attributeExpressionExecutors[1].getReturnType().toString());
                 }
             }
         }
@@ -144,11 +142,11 @@ public class KalmanFilter extends FunctionExecutor {
     protected Object execute(Object[] data) {
         if (data[0] == null) {
             throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
-                                                    "function. First argument should be a double");
+                    "function. First argument should be a double");
         }
         if (data[1] == null) {
             throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
-                                                    "function. Second argument should be a double");
+                    "function. Second argument should be a double");
         }
         if (data.length == 2) {
             double measuredValue = (Double) data[0]; //to remain as the initial state
@@ -166,11 +164,11 @@ public class KalmanFilter extends FunctionExecutor {
         } else {
             if (data[2] == null) {
                 throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
-                                                        "function. Third argument should be a double");
+                        "function. Third argument should be a double");
             }
             if (data[3] == null) {
                 throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
-                                                        "function. Fourth argument should be a long");
+                        "function. Fourth argument should be a long");
             }
 
             double measuredXValue = (Double) data[0];
@@ -226,7 +224,7 @@ public class KalmanFilter extends FunctionExecutor {
     protected Object execute(Object data) {
         if (data == null) {
             throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
-                                                    "function. Argument should be a double");
+                    "function. Argument should be a double");
         }
         double measuredValue = (Double) data; //to remain as the initial state
         if (transition == 0) {
