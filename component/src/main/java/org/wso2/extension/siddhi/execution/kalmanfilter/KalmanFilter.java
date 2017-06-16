@@ -15,18 +15,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.extension.siddhi.execution.kalmanfilter;
 
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
-import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
+import org.wso2.siddhi.annotation.Example;
+import org.wso2.siddhi.annotation.Extension;
+import org.wso2.siddhi.annotation.ReturnAttribute;
+import org.wso2.siddhi.annotation.util.DataType;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.function.FunctionExecutor;
+import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -37,7 +44,8 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
  * These methods estimate values for noisy data.
  * <p>
  * measuredValue - measured value eg:40.695881
- * measuredChangingRate - Changing rate. eg: Velocity of the point which describes from measured value - 0.003d meters per second
+ * measuredChangingRate - Changing rate. eg: Velocity of the point which describes from measured value
+ * - 0.003d meters per second
  * measurementNoiseSD - standard deviation of the noise. eg: 0.01
  * timestamp - the timestamp at the measured time eg: 1445234861l
  * <p>
@@ -58,6 +66,21 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
  */
 
 
+@Extension(name = "kalmanFilter", namespace = "kf", description = " Kalman filter",
+        examples = {
+                @Example(syntax =
+                        "from cleanedStream " +
+                        "select kf:kalmanFilter(latitude) as kalmanEstimatedValue " +
+                        "insert into dataOut;",
+                        description = "Calculated the Kalman filter")},
+        returnAttributes = {
+                @ReturnAttribute(
+                        description = "Return the function calculated value." ,
+                        type = {DataType.DOUBLE})}
+)
+/**
+ * Http source for receive the http and https request.
+ */
 public class KalmanFilter extends FunctionExecutor {
 
     Attribute.Type returnType = Attribute.Type.DOUBLE;
@@ -82,40 +105,50 @@ public class KalmanFilter extends FunctionExecutor {
 
     }
 
+
     @Override
-    public Object[] currentState() {
-        return new Object[]{transition, measurementNoiseSD, prevEstimatedValue, variance, measurementMatrixH,
-                varianceMatrixP, prevMeasuredMatrix, prevTimestamp};
+    public Map<String, Object> currentState() {
+        Map<String, Object> map = new HashMap<>();
+        map.put(KalmanFilterConstants.TRANSITION, transition);
+        map.put(KalmanFilterConstants.MEASUREMENT_NOISE_DS, measurementNoiseSD);
+        map.put(KalmanFilterConstants.PRE_ESTIMATED_VALUE, prevEstimatedValue);
+        map.put(KalmanFilterConstants.VARIENCE, variance);
+        map.put(KalmanFilterConstants.MEASUREMENT_MATRIX, measurementMatrixH);
+        map.put(KalmanFilterConstants.VARIENCE_MATRIX, varianceMatrixP);
+        map.put(KalmanFilterConstants.PREV_MEASURED_MATRIX, prevMeasuredMatrix);
+        map.put(KalmanFilterConstants.PREV_TIMESTAMP, prevTimestamp);
+        return map;
     }
 
     @Override
-    public void restoreState(Object[] state) {
-        transition = (Double) state[0];
-        measurementNoiseSD = (Double) state[1];
-        prevEstimatedValue = (Double) state[2];
-        variance = (Double) state[3];
-        measurementMatrixH = (RealMatrix) state[4];
-        varianceMatrixP = (RealMatrix) state[5];
-        prevMeasuredMatrix = (RealMatrix) state[6];
-        prevTimestamp = (Long) state[7];
+    public void restoreState(Map<String, Object> map) {
+        transition = (double) map.get(KalmanFilterConstants.TRANSITION);
+        measurementNoiseSD = (double) map.get(KalmanFilterConstants.MEASUREMENT_NOISE_DS);
+        prevEstimatedValue = (double) map.get(KalmanFilterConstants.PRE_ESTIMATED_VALUE);
+        variance = (double) map.get(KalmanFilterConstants.VARIENCE);
+        measurementMatrixH = (RealMatrix) map.get(KalmanFilterConstants.MEASUREMENT_MATRIX);
+        varianceMatrixP = (RealMatrix) map.get(KalmanFilterConstants.VARIENCE_MATRIX);
+        prevMeasuredMatrix = (RealMatrix) map.get(KalmanFilterConstants.PREV_MEASURED_MATRIX);
+        prevTimestamp = (long) map.get(KalmanFilterConstants.PREV_TIMESTAMP);
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
+    protected void init(ExpressionExecutor[] expressionExecutors, ConfigReader configReader,
+                        SiddhiAppContext executionPlanContext) {
         if (attributeExpressionExecutors.length != 1 && attributeExpressionExecutors.length != 2 &&
                 attributeExpressionExecutors.length != 4) {
-            throw new ExecutionPlanValidationException("Invalid no of arguments passed to kf:kalmanFilter() function," +
+            throw new SiddhiAppValidationException("Invalid no of arguments passed to kf:kalmanFilter() function," +
                     " required 1, 2 or 4, but found " + attributeExpressionExecutors.length);
         } else {
             if (attributeExpressionExecutors[0].getReturnType() != Attribute.Type.DOUBLE) {
-                throw new ExecutionPlanValidationException("Invalid parameter type found for the first argument " +
+                throw new SiddhiAppValidationException("Invalid parameter type found for the first argument " +
                         "of kf:kalmanFilter() function, required " +
                         Attribute.Type.DOUBLE + ", but found " +
                         attributeExpressionExecutors[0].getReturnType().toString());
             }
             if (attributeExpressionExecutors.length == 2 || attributeExpressionExecutors.length == 4) {
                 if (attributeExpressionExecutors[1].getReturnType() != Attribute.Type.DOUBLE) {
-                    throw new ExecutionPlanValidationException("Invalid parameter type found for the second argument " +
+                    throw new SiddhiAppValidationException("Invalid parameter type found for the second argument " +
                             "of kf:kalmanFilter() function, required " +
                             Attribute.Type.DOUBLE + ", but found " +
                             attributeExpressionExecutors[1].getReturnType().toString());
@@ -123,13 +156,13 @@ public class KalmanFilter extends FunctionExecutor {
             }
             if (attributeExpressionExecutors.length == 4) {
                 if (attributeExpressionExecutors[2].getReturnType() != Attribute.Type.DOUBLE) {
-                    throw new ExecutionPlanValidationException("Invalid parameter type found for the third argument " +
+                    throw new SiddhiAppValidationException("Invalid parameter type found for the third argument " +
                             "of kf:kalmanFilter() function, required " +
                             Attribute.Type.DOUBLE + ", but found " +
                             attributeExpressionExecutors[1].getReturnType().toString());
                 }
                 if (attributeExpressionExecutors[3].getReturnType() != Attribute.Type.LONG) {
-                    throw new ExecutionPlanValidationException("Invalid parameter type found for the fourth argument " +
+                    throw new SiddhiAppValidationException("Invalid parameter type found for the fourth argument " +
                             "of kf:kalmanFilter() function, required " +
                             Attribute.Type.LONG + ", but found " +
                             attributeExpressionExecutors[1].getReturnType().toString());
@@ -141,11 +174,11 @@ public class KalmanFilter extends FunctionExecutor {
     @Override
     protected Object execute(Object[] data) {
         if (data[0] == null) {
-            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
+            throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
                     "function. First argument should be a double");
         }
         if (data[1] == null) {
-            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
+            throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
                     "function. Second argument should be a double");
         }
         if (data.length == 2) {
@@ -163,11 +196,11 @@ public class KalmanFilter extends FunctionExecutor {
             return prevEstimatedValue;
         } else {
             if (data[2] == null) {
-                throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
+                throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
                         "function. Third argument should be a double");
             }
             if (data[3] == null) {
-                throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
+                throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
                         "function. Fourth argument should be a long");
             }
 
@@ -188,8 +221,8 @@ public class KalmanFilter extends FunctionExecutor {
             } else {
                 timestampDiff = (timestamp - prevTimestamp);
             }
-            double[][] Rvalues = {{measurementNoiseSD, 0}, {0, measurementNoiseSD}};
-            RealMatrix rMatrix = MatrixUtils.createRealMatrix(Rvalues);
+            double[][] rValues = {{measurementNoiseSD, 0}, {0, measurementNoiseSD}};
+            RealMatrix rMatrix = MatrixUtils.createRealMatrix(rValues);
             double[][] transitionValues = {{1d, timestampDiff}, {0d, 1d}};
             RealMatrix transitionMatrixA = MatrixUtils.createRealMatrix(transitionValues);
             RealMatrix measuredMatrixX = MatrixUtils.createRealMatrix(measuredValues);
@@ -200,12 +233,13 @@ public class KalmanFilter extends FunctionExecutor {
             //Pk = (A * P * AT) + Q
             varianceMatrixP = (transitionMatrixA.multiply(varianceMatrixP)).multiply(transitionMatrixA.transpose());
 
-            //S = (H * P * HT) + R
-            RealMatrix S = ((measurementMatrixH.multiply(varianceMatrixP)).multiply(measurementMatrixH.transpose())).add(rMatrix);
-            RealMatrix S_1 = new LUDecomposition(S).getSolver().getInverse();
+            //sMat = (H * P * HT) + R
+            RealMatrix sMat = ((measurementMatrixH.multiply(varianceMatrixP)).multiply(measurementMatrixH.transpose()))
+                    .add(rMatrix);
+            RealMatrix s1Mat = new LUDecomposition(sMat).getSolver().getInverse();
 
-            //P * HT * S-1
-            RealMatrix kalmanGainMatrix = (varianceMatrixP.multiply(measurementMatrixH.transpose())).multiply(S_1);
+            //P * HT * sMat-1
+            RealMatrix kalmanGainMatrix = (varianceMatrixP.multiply(measurementMatrixH.transpose())).multiply(s1Mat);
 
             //Xk = Xk + kalmanGainMatrix (Zk - HkXk )
             prevMeasuredMatrix = prevMeasuredMatrix.add(kalmanGainMatrix.multiply(
@@ -223,7 +257,7 @@ public class KalmanFilter extends FunctionExecutor {
     @Override
     protected Object execute(Object data) {
         if (data == null) {
-            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalmanFilter() " +
+            throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
                     "function. Argument should be a double");
         }
         double measuredValue = (Double) data; //to remain as the initial state

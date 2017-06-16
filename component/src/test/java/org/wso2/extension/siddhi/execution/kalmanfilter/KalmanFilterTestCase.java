@@ -18,11 +18,12 @@
 
 package org.wso2.extension.siddhi.execution.kalmanfilter;
 
-import junit.framework.Assert;
+
 import org.apache.log4j.Logger;
-import org.junit.Before;
-import org.junit.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -30,26 +31,29 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 
+/**
+ * Test case for KalmanFilter.
+ */
 public class KalmanFilterTestCase {
-    static final Logger log = Logger.getLogger(KalmanFilterTestCase.class);
+    private static final Logger log = Logger.getLogger(KalmanFilterTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
-    @Before
+    @BeforeMethod
     public void init() {
         count = 0;
         eventArrived = false;
     }
 
-    @Test
+    @org.testng.annotations.Test
     public void testStaticKalmanFilter() throws InterruptedException {
         log.info("testStaticKalmanFilter TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(
                 "" +
-                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
-                        "timestamp long); " +
+                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD " +
+                        "double, timestamp long); " +
                         "@info(name = 'query1') " +
                         "from cleanedStream " +
                         "select kf:kalmanFilter(latitude) as kalmanEstimatedValue " +
@@ -78,14 +82,14 @@ public class KalmanFilterTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("cleanedStream");
         executionPlanRuntime.start();
 
-        inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861l});
+        inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861L});
         Thread.sleep(500);
-        inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864l});
+        inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864L});
         Thread.sleep(500);
-        inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867l});
+        inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867L});
         Thread.sleep(100);
 
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(count, 3);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -95,10 +99,10 @@ public class KalmanFilterTestCase {
         log.info("testStaticKalmanFilter with standard deviation for noise TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(
                 "" +
-                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
-                        "timestamp long); " +
+                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD " +
+                        "double, timestamp long); " +
                         "@info(name = 'query1') " +
                         "from cleanedStream " +
                         "select kf:kalmanFilter(latitude, measurementNoiseSD) as kalmanEstimatedValue " +
@@ -127,14 +131,14 @@ public class KalmanFilterTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("cleanedStream");
         executionPlanRuntime.start();
 
-        inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861l});
+        inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861L});
         Thread.sleep(500);
-        inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864l});
+        inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864L});
         Thread.sleep(500);
-        inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867l});
+        inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867L});
         Thread.sleep(100);
 
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(count, 3);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -144,13 +148,14 @@ public class KalmanFilterTestCase {
         log.info("testDynamicKalmanFilter TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(
                 "" +
-                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
-                        "timestamp long); " +
+                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD " +
+                        "double, timestamp long); " +
                         "@info(name = 'query1') " +
                         "from cleanedStream " +
-                        "select kf:kalmanFilter(latitude, changingRate, measurementNoiseSD, timestamp) as kalmanEstimatedValue " +
+                        "select kf:kalmanFilter(latitude, changingRate, measurementNoiseSD, timestamp) as " +
+                        "kalmanEstimatedValue " +
                         "insert into dataOut;");
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
@@ -176,14 +181,14 @@ public class KalmanFilterTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("cleanedStream");
         executionPlanRuntime.start();
 
-        inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861l});
+        inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861L});
         Thread.sleep(500);
-        inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864l});
+        inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864L});
         Thread.sleep(500);
-        inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867l});
+        inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867L});
         Thread.sleep(100);
 
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(count, 3);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -193,13 +198,14 @@ public class KalmanFilterTestCase {
         log.info("testDynamicKalmanFilter2 TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
+        SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(
                 "" +
-                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD double, " +
-                        "timestamp long); " +
+                        "define stream cleanedStream (latitude double, changingRate double, measurementNoiseSD " +
+                        "double, timestamp long); " +
                         "@info(name = 'query1') " +
                         "from cleanedStream " +
-                        "select kf:kalmanFilter(latitude, changingRate, measurementNoiseSD, timestamp) as kalmanEstimatedValue " +
+                        "select kf:kalmanFilter(latitude, changingRate, measurementNoiseSD, timestamp) as " +
+                        "kalmanEstimatedValue " +
                         "insert into dataOut;");
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
@@ -225,14 +231,14 @@ public class KalmanFilterTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("cleanedStream");
         executionPlanRuntime.start();
 
-        inputHandler.send(new Object[]{40.695881, 0.003, 0.01d, 1445234861l});
+        inputHandler.send(new Object[]{40.695881, 0.003, 0.01d, 1445234861L});
         Thread.sleep(500);
-        inputHandler.send(new Object[]{40.695702, 0.003, 0.01d, 1445234864l});
+        inputHandler.send(new Object[]{40.695702, 0.003, 0.01d, 1445234864L});
         Thread.sleep(500);
-        inputHandler.send(new Object[]{40.694852999999995, 0.003, 0.01d, 1445234867l});
+        inputHandler.send(new Object[]{40.694852999999995, 0.003, 0.01d, 1445234867L});
         Thread.sleep(100);
 
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(count, 3);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
