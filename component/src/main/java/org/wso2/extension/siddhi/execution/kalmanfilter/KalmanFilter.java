@@ -134,7 +134,7 @@ public class KalmanFilter extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] expressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext executionPlanContext) {
+                        SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors.length != 1 && attributeExpressionExecutors.length != 2 &&
                 attributeExpressionExecutors.length != 4) {
             throw new SiddhiAppValidationException("Invalid no of arguments passed to kf:kalmanFilter() function," +
