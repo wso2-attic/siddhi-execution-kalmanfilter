@@ -29,6 +29,9 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -36,12 +39,14 @@ import org.wso2.siddhi.core.util.EventPrinter;
  */
 public class KalmanFilterTestCase {
     private static final Logger log = Logger.getLogger(KalmanFilterTestCase.class);
-    private volatile int count;
+    private AtomicInteger count = new AtomicInteger(0);
     private volatile boolean eventArrived;
+    private int waitTime = 50;
+    private int timeout = 30000;
 
     @BeforeMethod
     public void init() {
-        count = 0;
+        count.set(0);
         eventArrived = false;
     }
 
@@ -64,14 +69,14 @@ public class KalmanFilterTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
-                    count++;
-                    if (count == 1) {
+                    count.getAndIncrement();
+                    if (count.get() == 1) {
                         Assert.assertEquals(-74.178444d, event.getData(0));
                         eventArrived = true;
-                    } else if (count == 2) {
+                    } else if (count.get() == 2) {
                         Assert.assertEquals(-74.178158000143d, event.getData(0));
                         eventArrived = true;
-                    } else if (count == 3) {
+                    } else if (count.get() == 3) {
                         Assert.assertEquals(-74.1773396670348d, event.getData(0));
                         eventArrived = true;
                     }
@@ -81,15 +86,11 @@ public class KalmanFilterTestCase {
 
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cleanedStream");
         siddhiAppRuntime.start();
-
         inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861L});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864L});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867L});
-        Thread.sleep(100);
-
-        Assert.assertEquals(count, 3);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, count, timeout);
+        Assert.assertEquals(count.get(), 3);
         Assert.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
@@ -113,14 +114,14 @@ public class KalmanFilterTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
-                    count++;
-                    if (count == 1) {
+                    count.getAndIncrement();
+                    if (count.get() == 1) {
                         Assert.assertEquals(-74.178444d, event.getData(0));
                         eventArrived = true;
-                    } else if (count == 2) {
+                    } else if (count.get() == 2) {
                         Assert.assertEquals(-74.17815800142999d, event.getData(0));
                         eventArrived = true;
-                    } else if (count == 3) {
+                    } else if (count.get() == 3) {
                         Assert.assertEquals(-74.17733967034776d, event.getData(0));
                         eventArrived = true;
                     }
@@ -132,13 +133,11 @@ public class KalmanFilterTestCase {
         siddhiAppRuntime.start();
 
         inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861L});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864L});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867L});
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, count, timeout);
 
-        Assert.assertEquals(count, 3);
+        Assert.assertEquals(count.get(), 3);
         Assert.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
@@ -163,14 +162,14 @@ public class KalmanFilterTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
-                    count++;
-                    if (count == 1) {
+                    count.getAndIncrement();
+                    if (count.get() == 1) {
                         Assert.assertEquals(-74.1784439700006d, event.getData(0));
                         eventArrived = true;
-                    } else if (count == 2) {
+                    } else if (count.get() == 2) {
                         Assert.assertEquals(-74.17657538193608d, event.getData(0));
                         eventArrived = true;
-                    } else if (count == 3) {
+                    } else if (count.get() == 3) {
                         Assert.assertEquals(-74.17487924016262d, event.getData(0));
                         eventArrived = true;
                     }
@@ -182,13 +181,11 @@ public class KalmanFilterTestCase {
         siddhiAppRuntime.start();
 
         inputHandler.send(new Object[]{-74.178444, 0.003, 0.01d, 1445234861L});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{-74.177872, 0.003, 0.01d, 1445234864L});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{-74.175703, 0.003, 0.01d, 1445234867L});
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, count, timeout);
 
-        Assert.assertEquals(count, 3);
+        Assert.assertEquals(count.get(), 3);
         Assert.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
@@ -213,14 +210,14 @@ public class KalmanFilterTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
-                    count++;
-                    if (count == 1) {
+                    count.getAndIncrement();
+                    if (count.get() == 1) {
                         Assert.assertEquals(40.6958810299994d, event.getData(0));
                         eventArrived = true;
-                    } else if (count == 2) {
+                    } else if (count.get() == 2) {
                         Assert.assertEquals(40.69711415696983d, event.getData(0));
                         eventArrived = true;
-                    } else if (count == 3) {
+                    } else if (count.get() == 3) {
                         Assert.assertEquals(40.69632380976617d, event.getData(0));
                         eventArrived = true;
                     }
@@ -232,13 +229,11 @@ public class KalmanFilterTestCase {
         siddhiAppRuntime.start();
 
         inputHandler.send(new Object[]{40.695881, 0.003, 0.01d, 1445234861L});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{40.695702, 0.003, 0.01d, 1445234864L});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{40.694852999999995, 0.003, 0.01d, 1445234867L});
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, count, timeout);
 
-        Assert.assertEquals(count, 3);
+        Assert.assertEquals(count.get(), 3);
         Assert.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
