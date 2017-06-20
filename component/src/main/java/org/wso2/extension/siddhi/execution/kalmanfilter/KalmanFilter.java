@@ -83,7 +83,7 @@ import java.util.Map;
  */
 public class KalmanFilter extends FunctionExecutor {
 
-    Attribute.Type returnType = Attribute.Type.DOUBLE;
+    private Attribute.Type returnType = Attribute.Type.DOUBLE;
     //for static kalman filter
     private double transition; //A
     private double measurementNoiseSD; //standard deviation of the measurement noise
