@@ -22,6 +22,7 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
+import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.ReturnAttribute;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
@@ -67,6 +68,7 @@ import java.util.Map;
 
 
 @Extension(name = "kalmanFilter", namespace = "kf", description = " Kalman filter",
+        parameters = {@Parameter(name = "data", description = "TBD", type = DataType.DOUBLE)},
         examples = {
                 @Example(syntax =
                         "from cleanedStream " +

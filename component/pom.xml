@@ -83,6 +83,9 @@
                             !org.apache.commons.math3.*,
                             org.wso2.extension.siddhi.execution.kalmanfilter.*
                         </Export-Package>
+                        <Include-Resource>
+                            META-INF=target/classes/META-INF
+                        </Include-Resource>
                         <Import-Package>
                             *;resolution:=optional
                         </Import-Package>
