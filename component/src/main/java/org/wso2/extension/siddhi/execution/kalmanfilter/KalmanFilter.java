@@ -67,14 +67,77 @@ import java.util.Map;
  */
 
 
-@Extension(name = "kalmanFilter", namespace = "kf", description = " Kalman filter",
-        parameters = {@Parameter(name = "data", description = "TBD", type = DataType.DOUBLE)},
+@Extension(name = "kalmanFilter", namespace = "kf", description = " This extension provides Kalman filtering " +
+        "capabilities to Siddhi. This allows you to detect outliers of input data. This function uses " +
+        "measurements observed over time containing noise and other inaccuracies, and produces estimated " +
+        "values for the current measurement using Kalman algorithm.",
+        parameters = {
+        @Parameter(
+                name = "measured.value",
+                description = "The sequential change in the observed measurement.",
+                type = DataType.DOUBLE),
+        @Parameter(
+                name = "measured.changing.rate",
+                description = "The rate at which the measured change is taking place.",
+                type = DataType.DOUBLE),
+        @Parameter(
+                name = "measurement.noise.sd",
+                description = "The standard deviation of the noise.",
+                type = DataType.DOUBLE),
+        @Parameter(
+                name = "timestamp",
+                description = "The timestamp at the measured time",
+                type = DataType.LONG)},
         examples = {
                 @Example(syntax =
                         "from cleanedStream " +
-                        "select kf:kalmanFilter(latitude) as kalmanEstimatedValue " +
-                        "insert into dataOut;",
-                        description = "Calculated the Kalman filter")},
+                        "\nselect kf:kalmanFilter(latitude) as kalmanEstimatedValue " +
+                        "\ninsert into dataOut;",
+                        description = " This function produces estimated values for the current measurement by " +
+                                "assuming it is a static value using " +
+                                "Kalman algorithm. The latitude is a double value which is indicated by " +
+                                "measuredValue" +
+                                " e.g., 40.695881" +
+                                "\nEx:\t\n\n" +
+                                "\t1st round: kf:kalmanFilter(-74.178444) returns an estimated value of -74.178444.\n" +
+                                "\t2nd round: kf:kalmanFilter(-74.175703) returns an estimated value of " +
+                                "-74.1770735006853.\n" +
+                                "\t3rd round: kf:kalmanFilter(-74.177872) returns an estimated value of  " +
+                                "-74.1773396670348."),
+                @Example(syntax =
+                                "from cleanedStream " +
+                                "\nselect kf:kalmanFilter(latitude, noisesd) as kalmanEstimatedValue " +
+                                "\ninsert into dataOut;",
+                        description = "This function produces estimated values for the current measurement by " +
+                                "assuming it is a static value and considering the " +
+                                "distribution standard deviation as noisesd using Kalman algorithm." +
+                                "The noisesd is a double value which is indicated by measurementNoiseSD parameter." +
+                                " e.g., 0.01" +
+                                "\nEx: \t\n\n" +
+                                "\t1st round: kf:kalmanFilter(-74.178444, 0.003) returns an estimated value" +
+                                " of -74.178444.\n" +
+                                "\t2nd round: kf:kalmanFilter(-74.175703, 0.003) returns an estimated value of " +
+                                "-74.17707350205573.\n" +
+                                "\t3rd round: kf:kalmanFilter(-74.177872, 0.003) returns an estimated value of " +
+                                " -74.177339667771."),
+                @Example(syntax =
+                                "from cleanedStream " +
+                                "\nselect kf:kalmanFilter(latitude, measuredchangingrate, noisesd, timestamp) as " +
+                                "kalmanEstimatedValue " +
+                                "\ninsert into dataOut;",
+                        description = "This function produces estimated values for the current measurement by " +
+                                "assuming it is a dynamic value which can be changed with the given value" +
+                                " (measuredchangingrate) using " +
+                                "Kalman algorithms. The timestamp is a long value which means the time stamp " +
+                                "of the time at which the measurement was carried out." +
+                                "\nEx:\t\n\n" +
+                                "\t1st round: kf:kalmanFilter(-74.178444, 0.003, 0.01, time:" +
+                                "timestampInMilliseconds() ) returns an estimated value of -74.1784439700006.\n" +
+                                "\t2nd round: kf:kalmanFilter(-74.178444, 0.003, 0.01, time:" +
+                                "timestampInMilliseconds() ) returns an estimated value of -74.1784439700006.\n" +
+                                "\t3rd round: kf:kalmanFilter(-74.177872, 0.003, 0.01, time:" +
+                                "timestampInMilliseconds()) returns an estimated value of  -74.17697314316393.")
+        },
         returnAttributes = {
                 @ReturnAttribute(
                         description = "Return the function calculated value." ,
