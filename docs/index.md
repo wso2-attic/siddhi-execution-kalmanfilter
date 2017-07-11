@@ -40,7 +40,7 @@ Example Siddhi Queries
    
 How to Contribute
 ------------------
-   * Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-execution-kalmanfilter/tree/master) 
+   * Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-io-http/tree/master) 
    
 Contact us 
 ------------------
@@ -50,3 +50,7 @@ Contact us
    
 We welcome your feedback and contribution.
 ------------------
+
+## API Docs:
+
+1. <a href="./api/4.0.2-SNAPSHOT.md">4.0.2-SNAPSHOT</a>
