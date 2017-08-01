@@ -86,7 +86,7 @@ import java.util.Map;
                 type = DataType.DOUBLE),
         @Parameter(
                 name = "timestamp",
-                description = "The time stamp of the time at which the measurement was carried out.,
+                description = "The time stamp of the time at which the measurement was carried out.",
                 type = DataType.LONG)},
         examples = {
                 @Example(syntax =
