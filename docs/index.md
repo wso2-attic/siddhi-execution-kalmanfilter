@@ -1,8 +1,11 @@
 # siddhi-execution-kalman-filter
 ======================================
 ---
+|  Branch | Build Status |
+| :------ |:------------ | 
+| master  | [![Build Status](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-execution-kalmanfilter/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-execution-kalmanfilter/)|
+---
 ##### New version of Siddhi v4.0.0 is built in Java 8.
-##### Latest Released Version v4.0.0-m15.
 
 This extension provides Kalman filtering capabilities to Siddhi. This allows you to detect outliers of input data. 
 Following are the functions of the Kalman Filter extension.
