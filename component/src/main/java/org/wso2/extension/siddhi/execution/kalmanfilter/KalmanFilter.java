@@ -70,7 +70,7 @@ import java.util.Map;
 @Extension(name = "kalmanFilter", namespace = "kf", description = " This extension provides Kalman filtering " +
         "capabilities to Siddhi. This allows you to detect outliers of input data. This function uses " +
         "measurements observed over time containing noise and other inaccuracies, and produces estimated " +
-        "values for the current measurement using Kalman algorithm.",
+        "values for the current measurement using the Kalman algorithm.",
         parameters = {
         @Parameter(
                 name = "measured.value",
@@ -86,17 +86,17 @@ import java.util.Map;
                 type = DataType.DOUBLE),
         @Parameter(
                 name = "timestamp",
-                description = "The timestamp at the measured time",
+                description = "The time stamp of the time at which the measurement was carried out.",
                 type = DataType.LONG)},
         examples = {
                 @Example(syntax =
                         "from cleanedStream " +
                         "\nselect kf:kalmanFilter(latitude) as kalmanEstimatedValue " +
                         "\ninsert into dataOut;",
-                        description = " This function produces estimated values for the current measurement by " +
-                                "assuming it is a static value using " +
-                                "Kalman algorithm. The latitude is a double value which is indicated by " +
-                                "measuredValue" +
+                        description = "This function produces estimated values for the current measurement using the " +
+                                "Kalman algorithm. In order to do this, it is assumed that the current " +
+                                "measurement is a static value. The lattitude is a double value indicated by the" +
+                                " `measuredValue`. " +
                                 " e.g., 40.695881" +
                                 "\nEx:\t\n\n" +
                                 "\t1st round: kf:kalmanFilter(-74.178444) returns an estimated value of -74.178444.\n" +
@@ -108,10 +108,11 @@ import java.util.Map;
                                 "from cleanedStream " +
                                 "\nselect kf:kalmanFilter(latitude, noisesd) as kalmanEstimatedValue " +
                                 "\ninsert into dataOut;",
-                        description = "This function produces estimated values for the current measurement by " +
-                                "assuming it is a static value and considering the " +
-                                "distribution standard deviation as noisesd using Kalman algorithm." +
-                                "The noisesd is a double value which is indicated by measurementNoiseSD parameter." +
+                        description = "This function produces estimated values for the current measurement using the" +
+                                " Kalman algorithm. In order to do this, it is assumed that the current measurement" +
+                                " is a static value, and the distributed standard deviation is considered as the " +
+                                "standard deviation of noise. The standard deviation of noise is a double value as " +
+                                "indicated by the `measurementNoiseSD` parameter." +
                                 " e.g., 0.01" +
                                 "\nEx: \t\n\n" +
                                 "\t1st round: kf:kalmanFilter(-74.178444, 0.003) returns an estimated value" +
@@ -125,11 +126,11 @@ import java.util.Map;
                                 "\nselect kf:kalmanFilter(latitude, measuredchangingrate, noisesd, timestamp) as " +
                                 "kalmanEstimatedValue " +
                                 "\ninsert into dataOut;",
-                        description = "This function produces estimated values for the current measurement by " +
-                                "assuming it is a dynamic value which can be changed with the given value" +
-                                " (measuredchangingrate) using " +
-                                "Kalman algorithms. The timestamp is a long value which means the time stamp " +
-                                "of the time at which the measurement was carried out." +
+                        description = "This function produces estimated values for the current measurement using " +
+                                "the Kalman algorithm. In order to do this, it is assumed that the current " +
+                                "measurement is a dynamic value that can be changed with the given value. The " +
+                                "`timestamp` is a long value and it indicates the time at which the measurement is " +
+                                "carried out." +
                                 "\nEx:\t\n\n" +
                                 "\t1st round: kf:kalmanFilter(-74.178444, 0.003, 0.01, time:" +
                                 "timestampInMilliseconds() ) returns an estimated value of -74.1784439700006.\n" +
