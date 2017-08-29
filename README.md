@@ -1,7 +1,7 @@
-siddhi-execution-kalmanfilter
+siddhi-execution-kalman-filter
 ======================================
 
-The **siddhi-execution-kalmanfilter extension** is an extension to <a target="_blank" href="https://wso2.github
+The **siddhi-execution-kalman-filter extension** is an extension to <a target="_blank" href="https://wso2.github
 .io/siddhi">Siddhi</a> provides that Kalman filtering capabilities to Siddhi. This allows you to detect outliers of 
 input data. 
                                                                                                                                      
@@ -65,6 +65,8 @@ Find some useful links below:
  
 ## Support 
 
-* We are committed to ensuring support for this extension in production. Our kalmanfilter approach ensures that all support leverages our open development methodology and is provided by the very same engineers who build the technology. 
+* We are committed to ensuring support for this extension in production. Our kalman filter approach ensures that all 
+support leverages our open development methodology and is provided by the very same engineers who build the technology. 
 
-* For more details and to take advantage of this kalmanfilter opportunity contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
+* For more details and to take advantage of this kalman filter opportunity contact us via <a target="_blank" 
+href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
