@@ -14,6 +14,7 @@ Find some useful links below:
 
 ## Latest API Docs 
 
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-kalman-filter/api/4.0.2-SNAPSHOT">4.0.2-SNAPSHOT</a>.
 
 ## How to use 
 
@@ -47,6 +48,8 @@ Find some useful links below:
 
 ## Features
 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-kalman-filter/api/4.0.2-SNAPSHOT/#kalmanfilter-function">kalmanFilter</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*<br><div style="padding-left: 1em;"><p> This extension provides Kalman filtering capabilities to Siddhi. This allows you to detect outliers of input data. This function uses measurements observed over time containing noise and other inaccuracies, and produces estimated values for the current measurement using the Kalman algorithm.</p></div>
+
 ## How to Contribute
  
   * Please report issues at <a target="_blank" href="https://github.com/wso2-extensions/siddhi-execution-kalmanfilter/issues">GitHub Issue Tracker</a>.
@@ -70,7 +73,3 @@ support leverages our open development methodology and is provided by the very s
 
 * For more details and to take advantage of this kalman filter opportunity contact us via <a target="_blank" 
 href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
-
-## API Docs:
-
-1. <a href="./api/4.0.2-SNAPSHOT">4.0.2-SNAPSHOT</a>
