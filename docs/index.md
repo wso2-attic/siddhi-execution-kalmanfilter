@@ -1,58 +1,73 @@
-# siddhi-execution-kalman-filter
+siddhi-execution-kalmanfilter
 ======================================
+
+The **siddhi-execution-kalmanfilter extension** is an extension to <a target="_blank" href="https://wso2.github
+.io/siddhi">Siddhi</a> provides that Kalman filtering capabilities to Siddhi. This allows you to detect outliers of 
+input data. 
+                                                                                                                                     
+
+Find some useful links below:
+
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-execution-kalmanfilter">Source code</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-execution-kalmanfilter/releases">Releases</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-execution-kalmanfilter/issues">Issue tracker</a>
+
+## Latest API Docs 
+
+
+## How to use 
+
+**Using the extension in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>**
+
+* You can use this extension in the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support. 
+
+* This extension is shipped by default with WSO2 Stream Processor, if you wish to use an alternative version of this extension you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-execution-kalmanfilter/releases">jar</a> that can be found in the `<STREAM_PROCESSOR_HOME>/lib` directory.
+
+**Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a>**
+
+* This extension can be added as a maven dependency along with other Siddhi dependencies to your project.
+
+```
+     <dependency>
+        <groupId>org.wso2.extension.siddhi.execution.kalmanfilter</groupId>
+        <artifactId>siddhi-execution-kalman-filter-parent</artifactId>
+        <version>x.x.x</version>
+     </dependency>
+```
+
+## Jenkins Build Status
+
 ---
+
 |  Branch | Build Status |
 | :------ |:------------ | 
-| master  | [![Build Status](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-execution-kalmanfilter/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-execution-kalmanfilter/)|
+| master  | [![Build Status](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-execution-kalmanfilter/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-execution-kalmanfilter/) |
+
 ---
-##### New version of Siddhi v4.0.0 is built in Java 8.
 
-This extension provides Kalman filtering capabilities to Siddhi. This allows you to detect outliers of input data. 
-Following are the functions of the Kalman Filter extension.
+## Features
 
-Features Supported
-------------------
-This function uses measurements observed over time containing noise and other inaccuracies, and produces estimated values for the current measurement using Kalman algorithms. The parameters used are as follows.
-
- - measuredValue : The sequential change in the observed measurement. e.g., 40.695881
- - measuredChangingRate : The rate at which the measured change is taking place. e.g., The velocity with which the measured value is changed can be 0.003 meters per second.
- - measurementNoiseSD : The standard deviation of the noise. e.g., 0.01
- - timestamp : The time stamp of the time at which the measurement was carried out.
+## How to Contribute
  
-Prerequisites for using the feature
-------------------
-  - Siddhi Stream should be defined
+  * Please report issues at <a target="_blank" href="https://github.com/wso2-extensions/siddhi-execution-kalmanfilter/issues">GitHub Issue Tracker</a>.
   
-Deploying the feature
-------------------
-   Feature can be deploy as a OSGI bundle by putting jar file of component to DAS_HOME/lib directory of DAS 4.0.0 pack. 
-   
-Example Siddhi Queries
-------------------
-      - from cleanedStream
-        select kf:kalmanFilter(latitude) as kalmanEstimatedValue
-        insert into dataOut;
+  * Send your contributions as pull requests to <a target="_blank" href="https://github.com/wso2-extensions/siddhi-execution-kalmanfilter/tree/master">master branch</a>. 
+ 
+## Contact us 
+
+ * Post your questions with the <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">"Siddhi"</a> tag in <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">Stackoverflow</a>. 
+ 
+ * Siddhi developers can be contacted via the mailing lists:
+ 
+    Developers List   : [dev@wso2.org](mailto:dev@wso2.org)
     
-      - from cleanedStream
-        select kf:kalmanFilter(latitude, noisesd) as kalmanEstimatedValue
-        insert into dataOut;
-    
-      - from cleanedStream
-        select kf:kalmanFilter(latitude, measuredchangingrate, noisesd, timestamp) as kalmanEstimatedValue
-        insert into dataOut;
-   
-How to Contribute
-------------------
-   * Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-execution-kalmanfilter/tree/master) 
-   
-Contact us 
-------------------
-   Siddhi developers can be contacted via the mailing lists:
-     * Carbon Developers List : dev@wso2.org
-     * Carbon Architecture List : architecture@wso2.org
-   
-We welcome your feedback and contribution.
-------------------
+    Architecture List : [architecture@wso2.org](mailto:architecture@wso2.org)
+ 
+## Support 
+
+* We are committed to ensuring support for this extension in production. Our kalmanfilter approach ensures that all support leverages our open development methodology and is provided by the very same engineers who build the technology. 
+
+* For more details and to take advantage of this kalmanfilter opportunity contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
 
 ## API Docs:
 
