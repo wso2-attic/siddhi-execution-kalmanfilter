@@ -31,7 +31,7 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 ```
      <dependency>
         <groupId>org.wso2.extension.siddhi.execution.kalmanfilter</groupId>
-        <artifactId>siddhi-execution-kalman-filter-parent</artifactId>
+        <artifactId>siddhi-execution-kalman-filter</artifactId>
         <version>x.x.x</version>
      </dependency>
 ```
