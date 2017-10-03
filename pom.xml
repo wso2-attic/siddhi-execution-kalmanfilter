@@ -16,9 +16,7 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -29,7 +27,7 @@
 
     <groupId>org.wso2.extension.siddhi.execution.kalmanfilter</groupId>
     <artifactId>siddhi-execution-kalman-filter-parent</artifactId>
-    <version>4.0.2-SNAPSHOT</version>
+    <version>4.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Siddhi Execution Extension - Kalman Filter Aggregator Pom</name>
     <url>http://wso2.org</url>
@@ -48,7 +46,7 @@
 
     <properties>
         <testng.version>6.11</testng.version>
-        <siddhi.version>4.0.0-M89</siddhi.version>
+        <siddhi.version>4.0.0-M52</siddhi.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <commons-math3.version>3.2</commons-math3.version>
         <junit.version>4.10</junit.version>
@@ -113,12 +111,6 @@
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jacoco</groupId>
-                <artifactId>org.jacoco.agent</artifactId>
-                <classifier>runtime</classifier>
-                <version>${jacoco.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
