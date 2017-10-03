@@ -162,17 +162,6 @@ public class KalmanFilter extends FunctionExecutor {
     private long prevTimestamp;
 
     @Override
-    public void start() {
-
-    }
-
-    @Override
-    public void stop() {
-
-    }
-
-
-    @Override
     public Map<String, Object> currentState() {
         Map<String, Object> map = new HashMap<>();
         map.put(KalmanFilterConstants.TRANSITION, transition);
