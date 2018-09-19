@@ -7,7 +7,7 @@ extra_css:
 extra_javascript:
 - javascripts/extra.js
 repo_name: Siddhi-Execution-Kalmanfilter
-repo_url: https://github.com/wso2-extensions/siddhi-map-json
+repo_url: https://github.com/wso2-extensions/siddhi-execution-kalmanfilter
 copyright: Copyright &copy; 2011 - 2018 WSO2
 theme:
   name: 'material'
