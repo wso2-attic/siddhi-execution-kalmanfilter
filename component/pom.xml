@@ -98,6 +98,9 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Import-Package>
+                            org.wso2.siddhi.core.*;version="${siddhi.version.range}",
+                            org.wso2.siddhi.annotation.*;version="${siddhi.version.range}",
+                            org.wso2.siddhi.query.api.*;version="${siddhi.version.range}",
                             org.apache.commons.math3.*
                         </Import-Package>
                         <Export-Package>
