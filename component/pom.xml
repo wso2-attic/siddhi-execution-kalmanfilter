@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.extension.siddhi.execution.kalmanfilter</groupId>
         <artifactId>siddhi-execution-kalman-filter-parent</artifactId>
-        <version>4.1.2-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,11 +32,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-query-api</artifactId>
         </dependency>
         <dependency>
@@ -52,7 +52,7 @@
             <artifactId>testng</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-annotations</artifactId>
         </dependency>
     </dependencies>
@@ -62,7 +62,7 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.wso2.siddhi</groupId>
+                        <groupId>io.siddhi</groupId>
                         <artifactId>siddhi-doc-gen</artifactId>
                         <version>${siddhi.version}</version>
                         <executions>
@@ -98,9 +98,9 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Import-Package>
-                            org.wso2.siddhi.core.*;version="${siddhi.version.range}",
-                            org.wso2.siddhi.annotation.*;version="${siddhi.version.range}",
-                            org.wso2.siddhi.query.api.*;version="${siddhi.version.range}",
+                            io.siddhi.core.*;version="${siddhi.version.range}",
+                            io.siddhi.annotation.*;version="${siddhi.version.range}",
+                            io.siddhi.query.api.*;version="${siddhi.version.range}",
                             org.apache.commons.math3.*
                         </Import-Package>
                         <Export-Package>
@@ -156,7 +156,7 @@
                 </executions>
 	     </plugin>
             <plugin>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-doc-gen</artifactId>
                 <version>${siddhi.version}</version>
                 <executions>
