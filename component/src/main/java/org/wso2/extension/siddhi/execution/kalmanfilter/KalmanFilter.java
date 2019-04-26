@@ -17,21 +17,23 @@
  */
 package org.wso2.extension.siddhi.execution.kalmanfilter;
 
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ReturnAttribute;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.function.FunctionExecutor;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.ReturnAttribute;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.executor.function.FunctionExecutor;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -147,49 +149,14 @@ import java.util.Map;
 /**
  * Http source for receive the http and https request.
  */
-public class KalmanFilter extends FunctionExecutor {
+public class KalmanFilter extends FunctionExecutor<KalmanFilter.ExtensionState> {
 
     private Attribute.Type returnType = Attribute.Type.DOUBLE;
-    //for static kalman filter
-    private double transition; //A
-    private double measurementNoiseSD; //standard deviation of the measurement noise
-    private double prevEstimatedValue; //to remain as the initial state
-    private double variance; //P
-    //for dynamic kalman filter
-    private RealMatrix measurementMatrixH = null;
-    private RealMatrix varianceMatrixP;
-    private RealMatrix prevMeasuredMatrix;
-    private long prevTimestamp;
+
 
     @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(KalmanFilterConstants.TRANSITION, transition);
-        map.put(KalmanFilterConstants.MEASUREMENT_NOISE_DS, measurementNoiseSD);
-        map.put(KalmanFilterConstants.PRE_ESTIMATED_VALUE, prevEstimatedValue);
-        map.put(KalmanFilterConstants.VARIENCE, variance);
-        map.put(KalmanFilterConstants.MEASUREMENT_MATRIX, measurementMatrixH);
-        map.put(KalmanFilterConstants.VARIENCE_MATRIX, varianceMatrixP);
-        map.put(KalmanFilterConstants.PREV_MEASURED_MATRIX, prevMeasuredMatrix);
-        map.put(KalmanFilterConstants.PREV_TIMESTAMP, prevTimestamp);
-        return map;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> map) {
-        transition = (double) map.get(KalmanFilterConstants.TRANSITION);
-        measurementNoiseSD = (double) map.get(KalmanFilterConstants.MEASUREMENT_NOISE_DS);
-        prevEstimatedValue = (double) map.get(KalmanFilterConstants.PRE_ESTIMATED_VALUE);
-        variance = (double) map.get(KalmanFilterConstants.VARIENCE);
-        measurementMatrixH = (RealMatrix) map.get(KalmanFilterConstants.MEASUREMENT_MATRIX);
-        varianceMatrixP = (RealMatrix) map.get(KalmanFilterConstants.VARIENCE_MATRIX);
-        prevMeasuredMatrix = (RealMatrix) map.get(KalmanFilterConstants.PREV_MEASURED_MATRIX);
-        prevTimestamp = (long) map.get(KalmanFilterConstants.PREV_TIMESTAMP);
-    }
-
-    @Override
-    protected void init(ExpressionExecutor[] expressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+    protected StateFactory<ExtensionState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                ConfigReader configReader, SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1 && attributeExpressionExecutors.length != 2 &&
                 attributeExpressionExecutors.length != 4) {
             throw new SiddhiAppValidationException("Invalid no of arguments passed to kf:kalmanFilter() function," +
@@ -224,10 +191,11 @@ public class KalmanFilter extends FunctionExecutor {
                 }
             }
         }
+        return () -> new ExtensionState();
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, ExtensionState state) {
         if (data[0] == null) {
             throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
                     "function. First argument should be a double");
@@ -238,17 +206,18 @@ public class KalmanFilter extends FunctionExecutor {
         }
         if (data.length == 2) {
             double measuredValue = (Double) data[0]; //to remain as the initial state
-            if (prevEstimatedValue == 0) {
-                transition = 1;
-                variance = 1000;
-                measurementNoiseSD = (Double) data[1];
-                prevEstimatedValue = measuredValue;
+            if (state.prevEstimatedValue == 0) {
+                state.transition = 1;
+                state.variance = 1000;
+                state.measurementNoiseSD = (Double) data[1];
+                state.prevEstimatedValue = measuredValue;
             }
-            prevEstimatedValue = transition * prevEstimatedValue;
-            double kalmanGain = variance / (variance + measurementNoiseSD);
-            prevEstimatedValue = prevEstimatedValue + kalmanGain * (measuredValue - prevEstimatedValue);
-            variance = (1 - kalmanGain) * variance;
-            return prevEstimatedValue;
+            state.prevEstimatedValue = state.transition * state.prevEstimatedValue;
+            double kalmanGain = state.variance / (state.variance + state.measurementNoiseSD);
+            state.prevEstimatedValue = state.prevEstimatedValue + kalmanGain * (measuredValue -
+                    state.prevEstimatedValue);
+            state.variance = (1 - kalmanGain) * state.variance;
+            return state.prevEstimatedValue;
         } else {
             if (data[2] == null) {
                 throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
@@ -266,15 +235,15 @@ public class KalmanFilter extends FunctionExecutor {
             long timestampDiff;
             double[][] measuredValues = {{measuredXValue}, {measuredChangingRate}};
 
-            if (measurementMatrixH == null) {
+            if (state.measurementMatrixH == null) {
                 timestampDiff = 1;
                 double[][] varianceValues = {{1000, 0}, {0, 1000}};
                 double[][] measurementValues = {{1, 0}, {0, 1}};
-                measurementMatrixH = MatrixUtils.createRealMatrix(measurementValues);
-                varianceMatrixP = MatrixUtils.createRealMatrix(varianceValues);
-                prevMeasuredMatrix = MatrixUtils.createRealMatrix(measuredValues);
+                state.measurementMatrixH = MatrixUtils.createRealMatrix(measurementValues);
+                state.varianceMatrixP = MatrixUtils.createRealMatrix(varianceValues);
+                state.prevMeasuredMatrix = MatrixUtils.createRealMatrix(measuredValues);
             } else {
-                timestampDiff = (timestamp - prevTimestamp);
+                timestampDiff = (timestamp - state.prevTimestamp);
             }
             double[][] rValues = {{measurementNoiseSD, 0}, {0, measurementNoiseSD}};
             RealMatrix rMatrix = MatrixUtils.createRealMatrix(rValues);
@@ -283,50 +252,53 @@ public class KalmanFilter extends FunctionExecutor {
             RealMatrix measuredMatrixX = MatrixUtils.createRealMatrix(measuredValues);
 
             //Xk = (A * Xk-1)
-            prevMeasuredMatrix = transitionMatrixA.multiply(prevMeasuredMatrix);
+            state.prevMeasuredMatrix = transitionMatrixA.multiply(state.prevMeasuredMatrix);
 
             //Pk = (A * P * AT) + Q
-            varianceMatrixP = (transitionMatrixA.multiply(varianceMatrixP)).multiply(transitionMatrixA.transpose());
+            state.varianceMatrixP = (transitionMatrixA.multiply(state.varianceMatrixP)).multiply(
+                    transitionMatrixA.transpose());
 
             //sMat = (H * P * HT) + R
-            RealMatrix sMat = ((measurementMatrixH.multiply(varianceMatrixP)).multiply(measurementMatrixH.transpose()))
+            RealMatrix sMat = ((state.measurementMatrixH.multiply(state.varianceMatrixP)).multiply(
+                    state.measurementMatrixH.transpose()))
                     .add(rMatrix);
             RealMatrix s1Mat = new LUDecomposition(sMat).getSolver().getInverse();
 
             //P * HT * sMat-1
-            RealMatrix kalmanGainMatrix = (varianceMatrixP.multiply(measurementMatrixH.transpose())).multiply(s1Mat);
+            RealMatrix kalmanGainMatrix = (state.varianceMatrixP.multiply(state.measurementMatrixH.transpose())).
+                    multiply(s1Mat);
 
             //Xk = Xk + kalmanGainMatrix (Zk - HkXk )
-            prevMeasuredMatrix = prevMeasuredMatrix.add(kalmanGainMatrix.multiply(
-                    (measuredMatrixX.subtract(measurementMatrixH.multiply(prevMeasuredMatrix)))));
+            state.prevMeasuredMatrix = state.prevMeasuredMatrix.add(kalmanGainMatrix.multiply(
+                    (measuredMatrixX.subtract(state.measurementMatrixH.multiply(state.prevMeasuredMatrix)))));
 
             //Pk = Pk - K.Hk.Pk
-            varianceMatrixP = varianceMatrixP.subtract(
-                    (kalmanGainMatrix.multiply(measurementMatrixH)).multiply(varianceMatrixP));
+            state.varianceMatrixP = state.varianceMatrixP.subtract(
+                    (kalmanGainMatrix.multiply(state.measurementMatrixH)).multiply(state.varianceMatrixP));
 
-            prevTimestamp = timestamp;
-            return prevMeasuredMatrix.getRow(0)[0];
+            state.prevTimestamp = timestamp;
+            return state.prevMeasuredMatrix.getRow(0)[0];
         }
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, ExtensionState state) {
         if (data == null) {
             throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
                     "function. Argument should be a double");
         }
         double measuredValue = (Double) data; //to remain as the initial state
-        if (transition == 0) {
-            transition = 1;
-            variance = 1000;
-            measurementNoiseSD = 0.001d;
-            prevEstimatedValue = measuredValue;
+        if (state.transition == 0) {
+            state.transition = 1;
+            state.variance = 1000;
+            state.measurementNoiseSD = 0.001d;
+            state.prevEstimatedValue = measuredValue;
         }
-        prevEstimatedValue = transition * prevEstimatedValue;
-        double kalmanGain = variance / (variance + measurementNoiseSD);
-        prevEstimatedValue = prevEstimatedValue + kalmanGain * (measuredValue - prevEstimatedValue);
-        variance = (1 - kalmanGain) * variance;
-        return prevEstimatedValue;
+        state.prevEstimatedValue = state.transition * state.prevEstimatedValue;
+        double kalmanGain = state.variance / (state.variance + state.measurementNoiseSD);
+        state.prevEstimatedValue = state.prevEstimatedValue + kalmanGain * (measuredValue - state.prevEstimatedValue);
+        state.variance = (1 - kalmanGain) * state.variance;
+        return state.prevEstimatedValue;
     }
 
     @Override
@@ -334,4 +306,47 @@ public class KalmanFilter extends FunctionExecutor {
         return returnType;
     }
 
+    static class ExtensionState extends State {
+        //for static kalman filter
+        private  double transition; //A
+        private  double measurementNoiseSD; //standard deviation of the measurement noise
+        private  double prevEstimatedValue; //to remain as the initial state
+        private  double variance; //P
+        //for dynamic kalman filter
+        private  RealMatrix measurementMatrixH = null;
+        private  RealMatrix varianceMatrixP;
+        private  RealMatrix prevMeasuredMatrix;
+        private  long prevTimestamp;
+
+        @Override
+        public boolean canDestroy() {
+            return false;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> map = new HashMap<>();
+            map.put(KalmanFilterConstants.TRANSITION, transition);
+            map.put(KalmanFilterConstants.MEASUREMENT_NOISE_DS, measurementNoiseSD);
+            map.put(KalmanFilterConstants.PRE_ESTIMATED_VALUE, prevEstimatedValue);
+            map.put(KalmanFilterConstants.VARIENCE, variance);
+            map.put(KalmanFilterConstants.MEASUREMENT_MATRIX, measurementMatrixH);
+            map.put(KalmanFilterConstants.VARIENCE_MATRIX, varianceMatrixP);
+            map.put(KalmanFilterConstants.PREV_MEASURED_MATRIX, prevMeasuredMatrix);
+            map.put(KalmanFilterConstants.PREV_TIMESTAMP, prevTimestamp);
+            return map;
+        }
+
+        @Override
+        public void restore(Map<String, Object> map) {
+            transition = (double) map.get(KalmanFilterConstants.TRANSITION);
+            measurementNoiseSD = (double) map.get(KalmanFilterConstants.MEASUREMENT_NOISE_DS);
+            prevEstimatedValue = (double) map.get(KalmanFilterConstants.PRE_ESTIMATED_VALUE);
+            variance = (double) map.get(KalmanFilterConstants.VARIENCE);
+            measurementMatrixH = (RealMatrix) map.get(KalmanFilterConstants.MEASUREMENT_MATRIX);
+            varianceMatrixP = (RealMatrix) map.get(KalmanFilterConstants.VARIENCE_MATRIX);
+            prevMeasuredMatrix = (RealMatrix) map.get(KalmanFilterConstants.PREV_MEASURED_MATRIX);
+            prevTimestamp = (long) map.get(KalmanFilterConstants.PREV_TIMESTAMP);
+        }
+    }
 }
