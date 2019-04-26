@@ -152,16 +152,7 @@ import java.util.Map;
 public class KalmanFilter extends FunctionExecutor<KalmanFilter.ExtensionState> {
 
     private Attribute.Type returnType = Attribute.Type.DOUBLE;
-    //for static kalman filter
-    private double transition; //A
-    private double measurementNoiseSD; //standard deviation of the measurement noise
-    private double prevEstimatedValue; //to remain as the initial state
-    private double variance; //P
-    //for dynamic kalman filter
-    private RealMatrix measurementMatrixH = null;
-    private RealMatrix varianceMatrixP;
-    private RealMatrix prevMeasuredMatrix;
-    private long prevTimestamp;
+
 
     @Override
     protected StateFactory<ExtensionState> init(ExpressionExecutor[] attributeExpressionExecutors,
@@ -215,17 +206,18 @@ public class KalmanFilter extends FunctionExecutor<KalmanFilter.ExtensionState> 
         }
         if (data.length == 2) {
             double measuredValue = (Double) data[0]; //to remain as the initial state
-            if (prevEstimatedValue == 0) {
-                transition = 1;
-                variance = 1000;
-                measurementNoiseSD = (Double) data[1];
-                prevEstimatedValue = measuredValue;
+            if (state.prevEstimatedValue == 0) {
+                state.transition = 1;
+                state.variance = 1000;
+                state.measurementNoiseSD = (Double) data[1];
+                state.prevEstimatedValue = measuredValue;
             }
-            prevEstimatedValue = transition * prevEstimatedValue;
-            double kalmanGain = variance / (variance + measurementNoiseSD);
-            prevEstimatedValue = prevEstimatedValue + kalmanGain * (measuredValue - prevEstimatedValue);
-            variance = (1 - kalmanGain) * variance;
-            return prevEstimatedValue;
+            state.prevEstimatedValue = state.transition * state.prevEstimatedValue;
+            double kalmanGain = state.variance / (state.variance + state.measurementNoiseSD);
+            state.prevEstimatedValue = state.prevEstimatedValue + kalmanGain * (measuredValue -
+                    state.prevEstimatedValue);
+            state.variance = (1 - kalmanGain) * state.variance;
+            return state.prevEstimatedValue;
         } else {
             if (data[2] == null) {
                 throw new SiddhiAppRuntimeException("Invalid input given to kf:kalmanFilter() " +
@@ -243,15 +235,15 @@ public class KalmanFilter extends FunctionExecutor<KalmanFilter.ExtensionState> 
             long timestampDiff;
             double[][] measuredValues = {{measuredXValue}, {measuredChangingRate}};
 
-            if (measurementMatrixH == null) {
+            if (state.measurementMatrixH == null) {
                 timestampDiff = 1;
                 double[][] varianceValues = {{1000, 0}, {0, 1000}};
                 double[][] measurementValues = {{1, 0}, {0, 1}};
-                measurementMatrixH = MatrixUtils.createRealMatrix(measurementValues);
-                varianceMatrixP = MatrixUtils.createRealMatrix(varianceValues);
-                prevMeasuredMatrix = MatrixUtils.createRealMatrix(measuredValues);
+                state.measurementMatrixH = MatrixUtils.createRealMatrix(measurementValues);
+                state.varianceMatrixP = MatrixUtils.createRealMatrix(varianceValues);
+                state.prevMeasuredMatrix = MatrixUtils.createRealMatrix(measuredValues);
             } else {
-                timestampDiff = (timestamp - prevTimestamp);
+                timestampDiff = (timestamp - state.prevTimestamp);
             }
             double[][] rValues = {{measurementNoiseSD, 0}, {0, measurementNoiseSD}};
             RealMatrix rMatrix = MatrixUtils.createRealMatrix(rValues);
@@ -260,29 +252,32 @@ public class KalmanFilter extends FunctionExecutor<KalmanFilter.ExtensionState> 
             RealMatrix measuredMatrixX = MatrixUtils.createRealMatrix(measuredValues);
 
             //Xk = (A * Xk-1)
-            prevMeasuredMatrix = transitionMatrixA.multiply(prevMeasuredMatrix);
+            state.prevMeasuredMatrix = transitionMatrixA.multiply(state.prevMeasuredMatrix);
 
             //Pk = (A * P * AT) + Q
-            varianceMatrixP = (transitionMatrixA.multiply(varianceMatrixP)).multiply(transitionMatrixA.transpose());
+            state.varianceMatrixP = (transitionMatrixA.multiply(state.varianceMatrixP)).multiply(
+                    transitionMatrixA.transpose());
 
             //sMat = (H * P * HT) + R
-            RealMatrix sMat = ((measurementMatrixH.multiply(varianceMatrixP)).multiply(measurementMatrixH.transpose()))
+            RealMatrix sMat = ((state.measurementMatrixH.multiply(state.varianceMatrixP)).multiply(
+                    state.measurementMatrixH.transpose()))
                     .add(rMatrix);
             RealMatrix s1Mat = new LUDecomposition(sMat).getSolver().getInverse();
 
             //P * HT * sMat-1
-            RealMatrix kalmanGainMatrix = (varianceMatrixP.multiply(measurementMatrixH.transpose())).multiply(s1Mat);
+            RealMatrix kalmanGainMatrix = (state.varianceMatrixP.multiply(state.measurementMatrixH.transpose())).
+                    multiply(s1Mat);
 
             //Xk = Xk + kalmanGainMatrix (Zk - HkXk )
-            prevMeasuredMatrix = prevMeasuredMatrix.add(kalmanGainMatrix.multiply(
-                    (measuredMatrixX.subtract(measurementMatrixH.multiply(prevMeasuredMatrix)))));
+            state.prevMeasuredMatrix = state.prevMeasuredMatrix.add(kalmanGainMatrix.multiply(
+                    (measuredMatrixX.subtract(state.measurementMatrixH.multiply(state.prevMeasuredMatrix)))));
 
             //Pk = Pk - K.Hk.Pk
-            varianceMatrixP = varianceMatrixP.subtract(
-                    (kalmanGainMatrix.multiply(measurementMatrixH)).multiply(varianceMatrixP));
+            state.varianceMatrixP = state.varianceMatrixP.subtract(
+                    (kalmanGainMatrix.multiply(state.measurementMatrixH)).multiply(state.varianceMatrixP));
 
-            prevTimestamp = timestamp;
-            return prevMeasuredMatrix.getRow(0)[0];
+            state.prevTimestamp = timestamp;
+            return state.prevMeasuredMatrix.getRow(0)[0];
         }
     }
 
@@ -293,17 +288,17 @@ public class KalmanFilter extends FunctionExecutor<KalmanFilter.ExtensionState> 
                     "function. Argument should be a double");
         }
         double measuredValue = (Double) data; //to remain as the initial state
-        if (transition == 0) {
-            transition = 1;
-            variance = 1000;
-            measurementNoiseSD = 0.001d;
-            prevEstimatedValue = measuredValue;
+        if (state.transition == 0) {
+            state.transition = 1;
+            state.variance = 1000;
+            state.measurementNoiseSD = 0.001d;
+            state.prevEstimatedValue = measuredValue;
         }
-        prevEstimatedValue = transition * prevEstimatedValue;
-        double kalmanGain = variance / (variance + measurementNoiseSD);
-        prevEstimatedValue = prevEstimatedValue + kalmanGain * (measuredValue - prevEstimatedValue);
-        variance = (1 - kalmanGain) * variance;
-        return prevEstimatedValue;
+        state.prevEstimatedValue = state.transition * state.prevEstimatedValue;
+        double kalmanGain = state.variance / (state.variance + state.measurementNoiseSD);
+        state.prevEstimatedValue = state.prevEstimatedValue + kalmanGain * (measuredValue - state.prevEstimatedValue);
+        state.variance = (1 - kalmanGain) * state.variance;
+        return state.prevEstimatedValue;
     }
 
     @Override
@@ -311,7 +306,17 @@ public class KalmanFilter extends FunctionExecutor<KalmanFilter.ExtensionState> 
         return returnType;
     }
 
-    class ExtensionState extends State {
+    static class ExtensionState extends State {
+        //for static kalman filter
+        private  double transition; //A
+        private  double measurementNoiseSD; //standard deviation of the measurement noise
+        private  double prevEstimatedValue; //to remain as the initial state
+        private  double variance; //P
+        //for dynamic kalman filter
+        private  RealMatrix measurementMatrixH = null;
+        private  RealMatrix varianceMatrixP;
+        private  RealMatrix prevMeasuredMatrix;
+        private  long prevTimestamp;
 
         @Override
         public boolean canDestroy() {
