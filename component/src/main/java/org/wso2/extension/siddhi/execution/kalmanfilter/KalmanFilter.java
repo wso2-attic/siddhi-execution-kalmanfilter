@@ -20,6 +20,7 @@ package org.wso2.extension.siddhi.execution.kalmanfilter;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -77,19 +78,36 @@ import java.util.Map;
         @Parameter(
                 name = "measured.value",
                 description = "The sequential change in the observed measurement.",
-                type = DataType.DOUBLE),
+                type = DataType.DOUBLE,
+                dynamic = true),
         @Parameter(
                 name = "measured.changing.rate",
                 description = "The rate at which the measured change is taking place.",
-                type = DataType.DOUBLE),
+                type = DataType.DOUBLE,
+                dynamic = true,
+                optional = true,
+                defaultValue = "0.0"),
         @Parameter(
                 name = "measurement.noise.sd",
                 description = "The standard deviation of the noise.",
-                type = DataType.DOUBLE),
+                type = DataType.DOUBLE,
+                dynamic = true,
+                optional = true,
+                defaultValue = "0.0"),
         @Parameter(
                 name = "timestamp",
                 description = "The time stamp of the time at which the measurement was carried out.",
-                type = DataType.LONG)},
+                type = DataType.LONG,
+                dynamic = true,
+                optional = true,
+                defaultValue = "time: timestampInMilliseconds()")},
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"measured.value"}),
+                @ParameterOverload(parameterNames = {"measured.value", "measurement.noise.sd"}),
+                @ParameterOverload(parameterNames = {"measured.value", "measured.changing.rate",
+                        "measurement.noise.sd", "timestamp"}),
+
+        },
         examples = {
                 @Example(syntax =
                         "from cleanedStream " +
